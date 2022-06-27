@@ -25,13 +25,13 @@ namespace FundooNote.Controllers
         {
             try
             {
-                this.userBL.AddUser(userPostModel);
+                
                 var user = fundooContext.Users.FirstOrDefault(u => u.Email == userPostModel.Email);
                 if (user != null)
                 {
                     return this.BadRequest(new { success = false, message = " Email Already Exist" });
                 }
-
+                this.userBL.AddUser(userPostModel);
                 return this.Ok(new { success = true, message = "Registration Successful" });
             }
             catch (Exception e)
@@ -39,5 +39,37 @@ namespace FundooNote.Controllers
                 throw e;
             }
         }
+        [HttpPost("Login")]
+        public IActionResult LogIn(string email, string password)
+        {
+            try
+            {
+
+                var user = fundooContext.Users.FirstOrDefault(u => u.Email == email);
+
+                if (user == null)
+                {
+                    return this.BadRequest(new { success = false, message = " Email does not Exist" });
+                }
+
+                string Password = PwdEncryptDecryptService.DecryptPassword(user.Password);
+                var userdata1 = fundooContext.Users.FirstOrDefault(u => u.Email == email && Password == password);
+
+                if (userdata1 == null)
+                {
+                    return this.BadRequest(new { success = false, message = " Password Invalid" });
+                }
+
+                string token = this.userBL.LogInUser(email , password );
+                return this.Ok(new { success = true, message = "Login Successful", data = token});
+
+            }
+
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
     }
+   
 }

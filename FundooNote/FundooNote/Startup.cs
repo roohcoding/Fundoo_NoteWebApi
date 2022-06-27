@@ -37,23 +37,37 @@ namespace FundooNote
             services.AddControllers();
             services.AddDbContext<FundooContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("FundooNote")));
+
+            var secret = this.Configuration.GetSection("JwtConfig").GetSection("SecretKey").Value;
+            var key = Encoding.ASCII.GetBytes(secret);
+
+
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(x =>
             {
-                x.RequireHttpsMetadata = false;
-                x.SaveToken = true;
-                x.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("THIS_IS_MY_KEY_TO_GENERATE_TOKEN")),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
+            //    x.RequireHttpsMetadata = false;
+            //    x.SaveToken = true;
+            //    x.TokenValidationParameters = new TokenValidationParameters
+            //    {
+            //        ValidateIssuerSigningKey = true,
+            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("THIS_IS_MY_KEY_TO_GENERATE_TOKEN")),
+            //        ValidateIssuer = false,
+            //        ValidateAudience = false
 
-                };
-            });
+            //    };
+            //});
+            x.TokenValidationParameters = new TokenValidationParameters
+            {
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidIssuer = "localhost",
+                ValidAudience = "localhost"
+            };
+        });
 
 
             services.AddSwaggerGen(setup =>
@@ -102,12 +116,12 @@ namespace FundooNote
             app.UseAuthentication();
             app.UseSwagger();
 
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.)
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.)Developer Exception Page
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "FundooNote");
             });
-
+            //built-in MapControllers extension method to map the incoming HTTP Request to our Controllers.
             app.UseRouting();
 
             app.UseAuthorization();
@@ -119,3 +133,4 @@ namespace FundooNote
         }
     }
 }
+ 
