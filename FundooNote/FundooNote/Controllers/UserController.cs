@@ -1,5 +1,6 @@
 ﻿using BusinessLayer.Interfaces;
 using DatabaseLayer.User;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryLayer.Services;
 using System;
@@ -39,7 +40,7 @@ namespace FundooNote.Controllers
                 throw e;
             }
         }
-        [HttpPost("Login")]
+        [HttpPost("LogIn/{email}/{password}")]
         public IActionResult LogIn(string email, string password)
         {
             try
@@ -70,6 +71,61 @@ namespace FundooNote.Controllers
                 throw e;
             }
         }
+
+        [HttpPost("Forgotpassword /{email}")]
+        public IActionResult ForgotPassword(string email)
+        {
+            try
+            {
+
+                var user = fundooContext.Users.FirstOrDefault(u => u.Email == email);
+
+                if (user == null)
+                {
+                    return this.BadRequest(new { success = false, message = " Email does not exist" });
+                }
+
+                                
+                bool token = this.userBL.ForgetPassword(email);
+                return this.Ok(new { success = true, message = "Forgot Password Email Sent" });
+
+            }
+
+            catch (Exception e)
+            { 
+                throw e;
+            }
+        }
+
+        [Authorize]
+        [HttpPut("Resetpassword")]
+        public IActionResult Resetpassword(UserPasswordModel userPasswordModel)
+        {
+            try
+            {
+                var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("UserId", StringComparison.InvariantCultureIgnoreCase));
+                int UserID = Int32.Parse(userid.Value);
+                var result = fundooContext.Users.Where(u => u.UserId == UserID).FirstOrDefault();
+                string Email = result.Email.ToString();
+                if (userPasswordModel.Password != userPasswordModel.ConfirmPassword)
+                {
+                    return BadRequest(new { success = false, message = "Password and Confirm password must be same" });
+                }
+                bool res = this.userBL.ResetPassword(Email, userPasswordModel);
+                if (res == false)
+                {
+                    return this.BadRequest(new { sucess = false, message = "Enter the valid Email" });
+                }
+                return this.Ok(new { succes = true, message = "Password change successfully" });
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+
     }
-   
+
+    
 }
