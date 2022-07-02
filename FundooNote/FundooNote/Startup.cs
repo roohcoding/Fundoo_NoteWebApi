@@ -100,7 +100,10 @@ namespace FundooNote
 
             services.AddTransient<IUserBL, UserBL>();
             services.AddTransient<IUserRL, UserRL>();
+            services.AddTransient<INoteBL, NoteBL>();
+            services.AddTransient<INoteRL, NoteRL>();
         }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
