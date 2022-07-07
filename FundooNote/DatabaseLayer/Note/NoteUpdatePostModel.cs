@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace DatabaseLayer.User
+namespace DatabaseLayer.Note
 {
-   public class NoteUpdatePostModel
+    public class NoteUpdatePostModel
     {
         [Required]
         public int noteID { get; set; }
@@ -17,19 +17,10 @@ namespace DatabaseLayer.User
         public string Colour { get; set; }
         [Required]
         public bool IsArchive { get; set; }
-        [Required]
-
         public bool IsPin { get; set; }
-        [Required]
         public bool IsReminder { get; set; }
-        [Required]
         public bool IsTrash { get; set; }
-        [Required]
-        public DateTime Reminder { get; set; }
-        [Required]
-        public DateTime CreatedDate { get; set; }
-        [Required]
-
-        public DateTime ModifiedDate { get; set; }
+  
+       
     }
 }

@@ -1,4 +1,5 @@
-﻿using DatabaseLayer.User;
+﻿using DatabaseLayer.Note;
+using DatabaseLayer.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RepositoryLayer.Interfaces;
@@ -85,19 +86,77 @@ namespace RepositoryLayer.Services
             }
         }
 
-        public async Task UpdateNote(int UserId, NoteUpdatePostModel noteUpdatePostModel)
+       
+
+
+
+     
+         async Task<Note> INoteRL.GetNote(int UserId, int NoteId)
+        {
+
+            try
+            {
+                var note = fundooContext.Notes.Where(u => u.UserId == UserId && u.noteID == NoteId).FirstOrDefault();
+
+                if (note == null)
+                {
+                    return null;
+                }
+                return await fundooContext.Notes.FirstOrDefaultAsync(u => u.noteID == NoteId);
+
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public async Task UpdateNote(int UserId, int noteId, NoteUpdatePostModel noteUpdatePostModel)
         {
             try
             {
-                Note note = new Note();
-                note.UserId = UserId;
-                note.Title = noteUpdatePostModel.Title;
-                note.Description = noteUpdatePostModel.Description;
-                note.Colour = noteUpdatePostModel.Colour;
-                note.CreatedDate = DateTime.Now;
-                note.ModifiedDate = DateTime.Now;
-                fundooContext.Update(note);
+                var note = await fundooContext.Notes.FirstOrDefaultAsync(u => u.UserId == UserId && u.noteID == noteId);
 
+                if (note != null)
+                {
+                    note.Title = noteUpdatePostModel.Title;
+                    note.Description = noteUpdatePostModel.Description;
+                    note.Colour = noteUpdatePostModel.Colour;
+
+                    note.IsArchive = noteUpdatePostModel.IsArchive;
+                    note.IsPin = noteUpdatePostModel.IsPin;
+                    note.IsReminder = noteUpdatePostModel.IsReminder;
+                    note.IsTrash = noteUpdatePostModel.IsTrash;
+                    await fundooContext.SaveChangesAsync();
+                }
+
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public async Task RemainderNote(int UserId, int noteId, ReminderModel reminderModel)
+        {
+            try
+            {
+                var note = fundooContext.Notes.Where(x => x.UserId == UserId && x.noteID == noteId).FirstOrDefault();
+                if (note != null)
+                {
+                    if (note.IsTrash == false)
+                    {
+                        if (note.IsReminder == false)
+                        {
+                            note.IsReminder = true;
+                            note.Reminder = DateTime.Now;
+                        }
+                        else
+                        {
+                            note.IsReminder = false;
+                        }
+                    }
+                }
                 await fundooContext.SaveChangesAsync();
             }
             catch (Exception e)
@@ -106,21 +165,79 @@ namespace RepositoryLayer.Services
             }
         }
 
-        
-
-        async Task<Note> INoteRL.GetNote(int UserId, int NoteId)
+        public async Task PinNote(int UserId, int noteId)
         {
-
             try
             {
-                var note = fundooContext.Notes.Where(u => u.UserId == UserId && u.noteID == NoteId ).FirstOrDefault();
-
-                if (note == null)
+                var note = fundooContext.Notes.Where(x => x.UserId == UserId && x.noteID == noteId).FirstOrDefault();
+                if (note != null)
                 {
-                    return null;
+                    if (note.IsTrash == false)
+                    {
+                        if (note.IsPin == false)
+                        {
+                            note.IsPin = true;
+                        }
+                        else
+                        {
+                            note.IsPin = false;
+                        }
+                    }
                 }
-                return await fundooContext.Notes.FirstOrDefaultAsync();
+                await fundooContext.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
 
+        public async Task ArchiveNote(int UserId, int noteId)
+        {
+            try
+            {
+                var note = fundooContext.Notes.Where(x => x.UserId == UserId && x.noteID == noteId).FirstOrDefault();
+                if (note != null)
+                {
+                    if (note.IsTrash == false)
+                    {
+                        if (note.IsArchive == false)
+                        {
+                            note.IsArchive = true;
+                        }
+                        else
+                        {
+                            note.IsArchive = false;
+                        }
+                    }
+                }
+                await fundooContext.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public async  Task Trash(int UserId, int noteId)
+        {
+            try
+            {
+                var note = fundooContext.Notes.Where(x => x.UserId == UserId && x.noteID == noteId).FirstOrDefault();
+                if (note != null)
+                {
+                    
+                        if (note.IsTrash == false)
+                        {
+                            note.IsTrash = true;
+                        }
+                        else
+                        {
+                            note.IsTrash = false;
+                        }
+                    
+                }
+                await fundooContext.SaveChangesAsync();
             }
             catch (Exception e)
             {

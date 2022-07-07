@@ -1,4 +1,5 @@
 ﻿using BusinessLayer.Interfaces;
+using DatabaseLayer.Note;
 using DatabaseLayer.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,7 @@ namespace FundooNote.Controllers
             this.fundooContext = fundooContext;
         }
         [Authorize]
-        [HttpPost("{Add}")]
+        [HttpPost]
         public async Task<ActionResult> AddNote(NotePostModel notePostModel)
         {
             try
@@ -46,7 +47,7 @@ namespace FundooNote.Controllers
         }
 
         [Authorize]
-        [HttpGet("{GetAll}")]
+        [HttpGet]
 
         public async Task<ActionResult> GetAllNote()
         {
@@ -103,17 +104,25 @@ namespace FundooNote.Controllers
         }
 
         [Authorize]
-        [HttpPut("{Update}")]
-        public async Task<ActionResult> UpdateNote(NoteUpdatePostModel noteUpdatePostModel)
+        [HttpPut]
+        public async Task<ActionResult> UpdateNote(int noteId, NoteUpdatePostModel noteUpdatePostModel)
         {
+
             try
             {
                 var currentUser = HttpContext.User;
-                int userId = Convert.ToInt32(currentUser.Claims.FirstOrDefault(c => c.Type == "UserId").Value);
-                await this.noteBL.UpdateNote(userId, noteUpdatePostModel);
-                return this.Ok(new { success = true, message = "Note Updated Sucessfully" });
-            }
+                int UserId = Convert.ToInt32(currentUser.Claims.FirstOrDefault(c => c.Type == "UserId").Value);
 
+                var noteCheck = fundooContext.Notes.FirstOrDefault(u => u.UserId == UserId && u.noteID == noteId);
+                if (noteCheck == null)
+                {
+                    return this.BadRequest(new { success = true, message = "Note Doesn't Exists" });
+                }
+
+                await this.noteBL.UpdateNote(UserId, noteId, noteUpdatePostModel);
+
+                return Ok(new { success = true, message = "Update Note Successfully" });
+            }
 
             catch (Exception e)
             {
@@ -122,7 +131,7 @@ namespace FundooNote.Controllers
         }
 
         [Authorize]
-        [HttpGet]
+        [HttpGet("{NoteId}")]
 
         public async Task<ActionResult> GetNote(int NoteId)
         {
@@ -133,14 +142,40 @@ namespace FundooNote.Controllers
                 var note = fundooContext.Notes.FirstOrDefault(u => u.UserId == userId && u.noteID == NoteId);
                 if (note == null)
                 {
-                    return Ok(new { success = false, message = "Note Not Received" });
-                    
-                
+                    return this.BadRequest(new { success = true, message = "Note Doesn't Exists" });
                 }
-                
-                 await this.noteBL.GetNote(userId, NoteId);
 
-                return this.BadRequest(new { success = true, message = "Note Received", data = note });
+                var noteElement = await this.noteBL.GetNote(userId, NoteId);
+
+                return Ok(new { success = true, message = "Get Note Successfully", data = noteElement });
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+
+
+        }
+
+        [Authorize]
+        [HttpPut("RemainderNote/{NoteId}")]
+
+        public async Task<ActionResult> RemainderNote(int NoteId,ReminderModel reminderModel )
+        {
+            try
+            {
+                var currentUser = HttpContext.User;
+                int userId = Convert.ToInt32(currentUser.Claims.FirstOrDefault(c => c.Type == "UserId").Value);
+                var note = fundooContext.Notes.FirstOrDefault(u => u.UserId == userId && u.noteID == NoteId);
+                if (note == null)
+                {
+
+                    return this.BadRequest(new { success = true, message = "Sorry! Note Doesn't Exist Please Create a Notes" });
+
+                }
+                await this.noteBL.RemainderNote(userId, NoteId, reminderModel );
+
+                return Ok(new { success = true, message = $"Note Remainder Successfully for the note, {note.Title} " });
 
             }
             catch (Exception e)
@@ -148,6 +183,88 @@ namespace FundooNote.Controllers
                 throw e;
             }
 
+        }
+
+
+        [Authorize]
+        [HttpPut("ArchiveNote/{NoteId}")]
+
+        public async Task<ActionResult> ArchiveNote(int NoteId)
+        {
+            try
+            {
+                var currentUser = HttpContext.User;
+                int userId = Convert.ToInt32(currentUser.Claims.FirstOrDefault(c => c.Type == "UserId").Value);
+                var note = fundooContext.Notes.FirstOrDefault(u => u.UserId == userId && u.noteID == NoteId);
+                if (note == null)
+                {
+
+                    return this.BadRequest(new { success = true, message = "Sorry! Note Doesn't Exist Please Create a Notes" });
+
+                }
+                await this.noteBL.ArchiveNote(userId, NoteId);
+
+                return Ok(new { success = true, message = $"Note Archive Successfully for the note, {note.Title} " });
+
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        [Authorize]
+        [HttpPut("PinNote/{NoteId}")]
+
+        public async Task<ActionResult> PinNote(int NoteId)
+        {
+            try
+            {
+                var currentUser = HttpContext.User;
+                int userId = Convert.ToInt32(currentUser.Claims.FirstOrDefault(c => c.Type == "UserId").Value);
+                var note = fundooContext.Notes.FirstOrDefault(u => u.UserId == userId && u.noteID == NoteId);
+                if (note == null)
+                {
+
+                    return this.BadRequest(new { success = true, message = "Sorry! Note Doesn't Exist Please Create a Notes" });
+
+                }
+                await this.noteBL.PinNote(userId, NoteId);
+
+                return Ok(new { success = true, message = $"Note Pinned Successfully for the note, {note.Title} " });
+
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+
+        }
+
+        [Authorize]
+        [HttpPut("Trash/{NoteId}")]
+        public async Task<ActionResult> Trash(int NoteId)
+        {
+            try
+            {
+                var currentUser = HttpContext.User;
+                int userId = Convert.ToInt32(currentUser.Claims.FirstOrDefault(c => c.Type == "UserId").Value);
+                var note = fundooContext.Notes.FirstOrDefault(u => u.UserId == userId && u.noteID == NoteId);
+                if (note == null)
+                {
+
+                    return this.BadRequest(new { success = true, message = "Sorry! Note Doesn't Exist Please Create a Notes" });
+
+                }
+                await this.noteBL.Trash(userId, NoteId);
+
+                return Ok(new { success = true, message = $"Note sent to Trash Successfully, {note.Title} " });
+
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
     }
 }
