@@ -15,7 +15,7 @@ namespace RepositoryLayer.Interfaces
         Task DeleteNote(int UserId, int noteId);
         Task UpdateNote(int UserId, int noteId, NoteUpdatePostModel noteUpdatePostModel);
         Task<Note> GetNote(int UserId, int NoteId);
-        Task RemainderNote(int UserId, int noteId,ReminderModel reminderModel );
+        Task ReminderNote(int UserId, int noteId, DateTime dateTime);
 
         Task PinNote(int UserId, int noteId);
 

@@ -1,18 +1,19 @@
-﻿using System;
+﻿using DatabaseLayer.Label;
+using RepositoryLayer.Services.Entities;
+using System;
 using System.Collections.Generic;
-using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BusinessLayer.Interfaces
+namespace BuisnessLayer.Interface
 {
     public interface ILabelBL
     {
-        Task AddLabel(int userId, int noteId, string LabelName);
-        Task DeleteLabel(int userId, int noteId);
-        Task UpdateLabel(int userId, int noteId, string LabelName);
-        //Task<Label> GetLabel(int userId, int noteId);
+        Task AddLabel(int userid, int noteid, string labelName);
+        Task DeleteLabel(int userid, int noteid);
+        Task UpdateLabel(int userid, int noteid, string labelName);
+        Task<Label> GetLabel(int userid, int noteid);
 
-        Task<List<Label>> GetAllLabel(int userid);
+        Task<List<LabelResponseModel>> Get_Label_Join(int userid);
     }
 }

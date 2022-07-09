@@ -137,7 +137,7 @@ namespace RepositoryLayer.Services
             }
         }
 
-        public async Task RemainderNote(int UserId, int noteId, ReminderModel reminderModel)
+        public async Task ReminderNote(int UserId, int noteId, DateTime dateTime)
         {
             try
             {
@@ -149,7 +149,7 @@ namespace RepositoryLayer.Services
                         if (note.IsReminder == false)
                         {
                             note.IsReminder = true;
-                            note.Reminder = DateTime.Now;
+                            note.Reminder = dateTime;
                         }
                         else
                         {
@@ -163,6 +163,7 @@ namespace RepositoryLayer.Services
             {
                 throw e;
             }
+
         }
 
         public async Task PinNote(int UserId, int noteId)

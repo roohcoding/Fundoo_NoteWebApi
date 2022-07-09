@@ -90,12 +90,11 @@ namespace BusinessLayer.Services
             }
         }
 
-        public async  Task RemainderNote(int UserId, int noteId,ReminderModel reminderModel )
+        public async Task ReminderNote(int UserId, int noteId, DateTime dateTime)
         {
-
             try
             {
-                await this.noteRL.RemainderNote(UserId, noteId,reminderModel );
+                await this.noteRL.ReminderNote(UserId, noteId, dateTime);
             }
             catch (Exception e)
             {

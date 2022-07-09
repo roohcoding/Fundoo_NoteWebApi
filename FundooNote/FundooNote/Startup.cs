@@ -1,3 +1,5 @@
+using BuisnessLayer.Interface;
+using BuisnessLayer.Services;
 using BusinessLayer.Interfaces;
 using BusinessLayer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -97,6 +99,13 @@ namespace FundooNote
                 });
 
             });
+
+            services.AddDistributedRedisCache(
+              options =>
+              {
+                  options.Configuration = "Localhost:6379";
+              }
+              );
 
             services.AddTransient<IUserBL, UserBL>();
             services.AddTransient<IUserRL, UserRL>();
